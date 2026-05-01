@@ -1,4 +1,7 @@
-# Pi-hole DNS Manager
+<h1 align="center"> Pi-hole DNS Manager </h1>
+
+<p align="center"><a href="https://github.com/jershbytes/pihole-dns-manager/actions/workflows/release.yml"><img src="https://github.com/jershbytes/pihole-dns-manager/actions/workflows/release.yml/badge.svg" alt="Release"></a></p>
+
 
 A desktop GUI for managing DNS records on a [Pi-hole v6](https://pi-hole.net/) instance. Supports adding and deleting A records and CNAME records via the Pi-hole v6 REST API.
 
