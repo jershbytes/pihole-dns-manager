@@ -225,6 +225,7 @@ app.whenReady().then(() => {
     backgroundColor: '#0f0f0f',
     autoHideMenuBar: true,
     title: 'Pi-hole DNS Manager',
+    icon: path.join(__dirname, '..', 'assets', 'pihole.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),  // src/preload.js
       contextIsolation: true,

@@ -28,7 +28,7 @@ A desktop GUI for managing DNS records on a [Pi-hole v6](https://pi-hole.net/) i
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/pihole-dns.git
+git clone https://github.com/jershbytes/pihole-dns-manager.git
 cd pihole-dns
 
 # Install dependencies
@@ -67,3 +67,9 @@ pihole-dns/
 ## License
 
 [MIT](LICENSE)
+
+---
+
+## Trademark Notice
+
+The Pi-hole logo used as the application icon is a trademark of [Pi-hole LLC](https://pi-hole.net/). Its use here is purely for identification purposes and does not imply any affiliation with or endorsement by Pi-hole LLC.
