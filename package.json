@@ -1,0 +1,13 @@
+{
+  "name": "pihole-dns",
+  "version": "1.0.0",
+  "description": "Pi-hole v6 DNS Manager",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --inspect"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0"
+  }
+}

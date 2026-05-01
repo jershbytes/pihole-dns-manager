@@ -1,0 +1,37 @@
+# ── Dependencies ───────────────────────────────────────────
+node_modules/
+
+# ── Bun ────────────────────────────────────────────────────
+# bun.lock is intentionally committed — remove this line if you want to exclude it
+# bun.lock
+
+# ── Electron build output ───────────────────────────────────
+dist/
+out/
+build/
+*.AppImage
+*.deb
+*.rpm
+*.snap
+*.exe
+*.dmg
+
+# ── Runtime / OS ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+
+# ── Secrets — NEVER commit these ───────────────────────────
+# The app stores credentials in Electron's userData directory (outside the repo).
+# If you ever add a local .env or config file, add it here:
+.env
+.env.*
+*.secret
+config.json
+secrets.json
+
+# ── Editor ─────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
