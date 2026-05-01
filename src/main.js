@@ -9,8 +9,14 @@ const fs = require('fs');
 // ── Connection state ────────────────────────────────────────
 const state = { baseUrl: '', sid: '', skipSslVerify: false };
 
+// Keep-alive agents — reuses sockets but lets us detect stale ones
+const agents = {
+  http: new http.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 4 }),
+  https: new https.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 4 }),
+};
+
 // ── HTTP/HTTPS helper ───────────────────────────────────────
-function apiRequest(urlPath, method = 'GET', body = null) {
+function apiRequest(urlPath, method = 'GET', body = null, _retry = false) {
   return new Promise((resolve, reject) => {
     if (!state.baseUrl) return reject(new Error('Not connected'));
 
@@ -27,13 +33,14 @@ function apiRequest(urlPath, method = 'GET', body = null) {
       port: fullUrl.port || (isHttps ? 443 : 80),
       path: fullUrl.pathname + (fullUrl.search || ''),
       method,
+      agent: isHttps ? agents.https : agents.http,
       headers: {
         'Content-Type': 'application/json',
         ...(state.sid && { sid: state.sid }),
         ...(bodyStr && { 'Content-Length': Buffer.byteLength(bodyStr) }),
       },
       ...(isHttps && { rejectUnauthorized: !state.skipSslVerify }),
-      timeout: 15000,
+      timeout: 30000,
     };
 
     const req = lib.request(options, (res) => {
@@ -46,8 +53,15 @@ function apiRequest(urlPath, method = 'GET', body = null) {
       });
     });
 
-    req.on('timeout', () => req.destroy(new Error('Request timed out (15s)')));
-    req.on('error', reject);
+    req.on('timeout', () => req.destroy(new Error('Request timed out (30s)')));
+    req.on('error', (err) => {
+      // Stale keep-alive socket — retry once on a fresh connection
+      if (!_retry && (err.code === 'ECONNRESET' || err.code === 'ECONNABORTED' || err.code === 'EPIPE')) {
+        apiRequest(urlPath, method, body, true).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
     if (bodyStr) req.write(bodyStr);
     req.end();
   });
@@ -103,7 +117,7 @@ ipcMain.handle('get-a-records', async () => {
 ipcMain.handle('add-a-record', async (_, { hostname, ip }) => {
   try {
     const encoded = encodeURIComponent(`${ip} ${hostname}`);
-    const res = await apiRequest(`/api/config/dns/hosts/${encoded}`, 'POST');
+    const res = await apiRequest(`/api/config/dns/hosts/${encoded}`, 'PUT');
     if ([200, 201, 204].includes(res.status)) return { ok: true };
     return { ok: false, error: res.data?.error?.message ?? `HTTP ${res.status}` };
   } catch (e) {
@@ -146,7 +160,7 @@ ipcMain.handle('get-cnames', async () => {
 ipcMain.handle('add-cname', async (_, { alias, target }) => {
   try {
     const encoded = encodeURIComponent(`${alias},${target}`);
-    const res = await apiRequest(`/api/config/dns/cnameRecords/${encoded}`, 'POST');
+    const res = await apiRequest(`/api/config/dns/cnameRecords/${encoded}`, 'PUT');
     if ([200, 201, 204].includes(res.status)) return { ok: true };
     return { ok: false, error: res.data?.error?.message ?? `HTTP ${res.status}` };
   } catch (e) {
